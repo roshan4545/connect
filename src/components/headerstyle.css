@@ -1,0 +1,13 @@
+.user {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#searchp
+{
+    margin: 5px;
+    font-size: 20px;
+}
