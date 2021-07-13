@@ -29,9 +29,12 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+const stripe = require('stripe')('sk_test_51IAaigBmRJgBiaQCSrt5hDUoBpCHdeRb77Zw5Lg6mB5JjrjGnLjweOOMTqmlSt59o3QAmH8zB0yBHFyk6BwcwuQZ00nEQfBtW3');
 
+const YOUR_DOMAIN = 'http://localhost:5000';
 
 const app = express();
+
 
 
 const limiter = rateLimit({
@@ -275,6 +278,28 @@ app.use('/create', (req, res, next) => {
     )
 })
 
+app.post('/create-checkout-session', async (req, res) => {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'inr',
+            product_data: {
+              name: req.name,
+              images: ['https://i.imgur.com/EHyR2nP.png'],
+            },
+            unit_amount: 2000,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${YOUR_DOMAIN}/success.html`,
+      cancel_url: `${YOUR_DOMAIN}/public/cancel.html`,
+    });
+    res.redirect(303, session.url)
+  });
 
 app.post('/search',(req,res) => {
     var text = req.body.text
@@ -425,6 +450,8 @@ app.use('/update/:id' ,(req, res, next) => {
         }
     })
 })
+
+
 
 app.all('*',(req,res,next) => {
     // res.status(404).json({
